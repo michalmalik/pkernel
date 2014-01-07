@@ -1,0 +1,1 @@
+OBJS := $(OBJS) arch/$(ARCH)/interrupt.o arch/$(ARCH)/int.o arch/$(ARCH)/io.o arch/$(ARCH)/desc_tables.o arch/$(ARCH)/boot.o

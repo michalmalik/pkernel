@@ -1,0 +1,1 @@
+OBJS := sys/string.o sys/vga.o sys/kernel.o
