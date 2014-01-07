@@ -1,7 +1,3 @@
-#include <sys/types.h>
-#include <sys/string.h>
-#include <io.h>
-
 #include <desc_tables.h>
 
 struct gdt_entry gdt[5];
@@ -30,7 +26,7 @@ static void init_gdt()
 
 	gdt_set_gate(0, 0, 0, 0, 0);			// null segment
 	gdt_set_gate(1, 0, 0xffffffff, 0x9a, 0xcf);	// code segment
-	gdt_set_gate(2, 0, 0xffffffff, 0x9a, 0xcf);	// data segment
+	gdt_set_gate(2, 0, 0xffffffff, 0x92, 0xcf);	// data segment
 	gdt_set_gate(3, 0, 0xffffffff, 0xfa, 0xcf);	// user code
 	gdt_set_gate(4, 0, 0xffffffff, 0xf2, 0xcf);	// user data
 
