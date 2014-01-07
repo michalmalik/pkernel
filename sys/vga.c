@@ -17,36 +17,32 @@ static u16 _vga_make_entry(char c, u8 color)
 	return c16|color16<<8;
 }
 
-void vga_set_color(u8 color)
-{
-	_vga_t_color = color;
-}
-
-void vga_putchar(char c)
-{
-	if(c == '\n') {
-		_vga_t_row++;
-		_vga_t_colm = -1;
-	} else if(c >= ' ') {
-		const size_t index = _vga_t_row*VGA_WIDTH+_vga_t_colm;
-		_vga_mem[index] = _vga_make_entry(c, _vga_t_color);
-	}
-
-	if(++_vga_t_colm == VGA_WIDTH) {
-		_vga_t_colm = 0;
-		if(++_vga_t_row == VGA_HEIGHT) {
-			_vga_t_row = 0;
-		}
-	}
-}
-
 void vga_move_cursor()
 {
 	u16 pos = _vga_t_row*VGA_WIDTH+_vga_t_colm;
 	outb(0x3D4, 14);
-	outb(0x3D5, pos>>16);
+	outb(0x3D5, pos>>8);
 	outb(0x3D4, 15);
 	outb(0x3D5, pos);
+}
+
+static void _vga_scroll()
+{
+	u8 blank_color = vga_make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
+	u16 blank = _vga_make_entry(' ', blank_color);
+
+	if(_vga_t_row >= VGA_HEIGHT) {
+		size_t i;
+		for(i = 0; i < (VGA_HEIGHT-1)*VGA_WIDTH; i++) {
+			_vga_mem[i] = _vga_mem[i+VGA_WIDTH];
+		}
+
+		for(i = (VGA_HEIGHT-1)*VGA_WIDTH; i < VGA_HEIGHT*VGA_WIDTH; i++) {
+			_vga_mem[i] = blank;
+		}
+
+		_vga_t_row = VGA_HEIGHT-1;
+	}
 }
 
 void vga_clear()
@@ -65,13 +61,43 @@ void vga_clear()
 	vga_move_cursor();
 }
 
+void vga_set_color(u8 color)
+{
+	_vga_t_color = color;
+}
+
+void vga_putchar(char c)
+{
+	if(c == 0x08 && _vga_t_colm) {
+		_vga_t_colm--;
+	} else if(c == 0x09) {
+		_vga_t_colm = (_vga_t_colm+8) & ~(8-1);
+	} else if(c == '\r') {
+		_vga_t_colm = 0;
+	} else if(c == '\n') {
+		_vga_t_row++;
+		_vga_t_colm = -1;
+	} else if(c >= ' ') {
+		const size_t index = _vga_t_row*VGA_WIDTH+_vga_t_colm;
+		_vga_mem[index] = _vga_make_entry(c, _vga_t_color);
+	}
+
+	if(++_vga_t_colm == VGA_WIDTH) {
+		_vga_t_colm = 0;
+		if(++_vga_t_row == VGA_HEIGHT) {
+			_vga_t_row = 0;
+		}
+	}
+
+	_vga_scroll();
+	vga_move_cursor();
+}
+
 void vga_write(const char *str)
 {
 	size_t i = 0;
 	while(str[i])
 		vga_putchar(str[i++]);
-
-	vga_move_cursor();
 }
 
 void vga_write_hex(uint32_t n)

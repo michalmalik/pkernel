@@ -31,6 +31,8 @@ enum vga_color {
 u8 make_color(enum vga_color fg, enum vga_color bg);
 void vga_set_color(u8 color);
 void vga_putchar(char c);
+void vg_move_cursor();
+void vga_clear();
 void vga_write(const char *str);
 void vga_write_hex(uint32_t n);
 void vga_write_dec(uint32_t n);
