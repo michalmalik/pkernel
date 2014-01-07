@@ -36,11 +36,13 @@ u32 inl(u32 p)
 	return _v;
 }
 
+// Enable hardware interrupts
 void cli()
 {
 	asmv("cli");
 }
 
+// Enable interrupts
 void sti()
 {
 	asmv("sti");
