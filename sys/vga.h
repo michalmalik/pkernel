@@ -37,5 +37,6 @@ void vga_write(const char *str);
 void vga_write_hex(uint32_t n);
 void vga_write_dec(uint32_t n);
 void vga_init(u16 *vmem);
+void vga_lol(void);
 
 #endif
